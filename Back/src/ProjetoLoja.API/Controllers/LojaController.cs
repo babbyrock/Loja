@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ProjetoLoja.API.Data;
 using ProjetoLoja.API.Models;
 
 namespace ProjetoLoja.API.Controllers
@@ -11,38 +12,25 @@ namespace ProjetoLoja.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     public class LojaController : ControllerBase
-    {    
-        public IEnumerable <Loja> _loja = new Loja[]{
-            new Loja(){
-            LojaId = 1,
-            CNPJ = "12345",
-            RazaoSocial = "Sapataria",
-            NomeFantasia = "Nova",
-            Telefone = "85989434173"
-            },
-            new Loja(){
-            LojaId = 2,
-            CNPJ = "5555",
-            RazaoSocial = "Papelaria",
-            NomeFantasia = "Faber Castel",
-            Telefone = "85888888888"
-            }
-        };
+    {
+        
+        private readonly DataContext _context;
 
-        public LojaController()
+        public LojaController(DataContext context)
         {
-            
+            _context = context;
+
         }
 
         [HttpGet]
         public IEnumerable<Loja> Get()
         {
-            return _loja;
+            return _context.Lojas;
         }
         [HttpGet("{id}")]
-        public IEnumerable<Loja> Get(int id)
+        public Loja Get(int id)
         {
-            return _loja.Where(loja => loja.LojaId == id);
+            return _context.Lojas.FirstOrDefault(loja => loja.LojaId == id);
         }
 
         [HttpPost]
@@ -62,6 +50,6 @@ namespace ProjetoLoja.API.Controllers
         {
             return $"exemplo de Delete com id = {id}";
         }
-        
+
     }
 }

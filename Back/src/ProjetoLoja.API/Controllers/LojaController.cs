@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ProjetoLoja.API.Data;
-using ProjetoLoja.API.Models;
+using ProjetoLoja.Persistence;
+using ProjetoLoja.Domain;
+using ProjetoLoja.Persistence.Context;
+using ProjetoLoja.Application.Contratos;
+using Microsoft.AspNetCore.Http;
 
 namespace ProjetoLoja.API.Controllers
 {
@@ -13,42 +16,121 @@ namespace ProjetoLoja.API.Controllers
     [Route("api/[controller]")]
     public class LojaController : ControllerBase
     {
-        
-        private readonly DataContext _context;
 
-        public LojaController(DataContext context)
+
+        private readonly ILojaService _lojaService;
+
+        public LojaController(ILojaService lojaService)
         {
-            _context = context;
-
+            _lojaService = lojaService;
         }
 
         [HttpGet]
-        public IEnumerable<Loja> Get()
+        public async Task<IActionResult> Get()
         {
-            return _context.Lojas;
+            try
+            {
+                var lojas = await _lojaService.GetAllLojaAsync();
+                if (lojas == null) return NotFound("Nenhum evento encontrado.");
+
+                return Ok(lojas);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                $"Erro ao tentar recuperar lojas. Error: {ex.Message}");
+
+            }
         }
+
         [HttpGet("{id}")]
-        public Loja Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return _context.Lojas.FirstOrDefault(loja => loja.LojaId == id);
+            try
+            {
+                var loja = await _lojaService.GetLojaByIdAsync(id);
+                if (loja == null) return NotFound("Loja por Id não encontrado.");
+
+                return Ok(loja);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                $"Erro ao tentar recuperar lojas. Error: {ex.Message}");
+
+            }
+        }
+
+        [HttpGet("{nomefantasia}/nomefantasia")]
+        public async Task<IActionResult> GetByNomeFantasia(string nome)
+        {
+            try
+            {
+                var loja = await _lojaService.GetAllLojaByNomeFantasiaAsync(nome);
+                if (loja == null) return NotFound("Loja por Nome não encontrado.");
+
+                return Ok(loja);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                $"Erro ao tentar recuperar lojas. Error: {ex.Message}");
+
+            }
         }
 
         [HttpPost]
-        public string Post()
+        public async Task<IActionResult> Post(Loja model)
         {
-            return "exemplo de post";
+            try
+            {
+                var loja = await _lojaService.AddLoja(model);
+                if (loja == null) return BadRequest("Erro ao tentar adicionar uma loja.");
+
+                return Ok(loja);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                $"Erro ao tentar adicionar lojas. Error: {ex.Message}");
+
+            }
         }
 
         [HttpPut("{id}")]
-        public string Put(int id)
+        public async Task<IActionResult> Put(int id, Loja model)
         {
-            return $"exemplo de put com id = {id}";
+            try
+            {
+                var loja = await _lojaService.UpdateLoja(id, model);
+                if (loja == null) return BadRequest("Erro ao tentar adicionar uma loja.");
+
+                return Ok(loja);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                $"Erro ao tentar atualizar lojas. Error: {ex.Message}");
+
+            }
         }
 
         [HttpDelete("{id}")]
-        public string Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            return $"exemplo de Delete com id = {id}";
+            try
+            {
+                return await _lojaService.DeleteLoja(id) ?
+                     Ok("Deletado") :
+                    BadRequest("Evento não deletado");
+                
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                $"Erro ao tentar deletar lojas. Error: {ex.Message}");
+
+            }
         }
 
     }

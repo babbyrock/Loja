@@ -12,7 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using ProjetoLoja.API.Data;
+using ProjetoLoja.Application;
+using ProjetoLoja.Application.Contratos;
+using ProjetoLoja.Persistence;
+using ProjetoLoja.Persistence.Context;
+using ProjetoLoja.Persistence.Contratos;
 
 namespace ProjetoLoja.API
 {
@@ -28,10 +32,16 @@ namespace ProjetoLoja.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(
+            services.AddDbContext<ProjetoLojaContext>(
                 context => context.UseSqlite(Configuration.GetConnectionString("Default"))
             );
-            services.AddControllers();
+            services.AddControllers()
+                    .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling =
+                    Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+            services.AddScoped<ILojaService, LojaService>();
+            services.AddScoped<IGeralPersist,GeralPersist>(); 
+            services.AddScoped<ILojaPersist, LojaPersist>();
             services.AddCors();
             services.AddSwaggerGen(c =>
             {

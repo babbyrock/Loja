@@ -1,8 +1,42 @@
-<h1>Loja do C</h1>
+<h1>Lojas</h1>
+<hr>
 
 
-<div *ngFor="let loja of lojas;">
-  <p><b>Nome:</b>{{loja.nomeFantasia}}</p>
-  <p><b>CNPJ:</b>{{loja.cnpj}}</p>
-  <hr>
+<div class="form-inline">
+  <div class="form-group mb-2">
+    <label class="mr-2">Filtro: </label>
+    <input type ="text" class="form-control mr-2" placeholder = "buscar" [(ngModel)]="filtroLista">
+
+  </div>
 </div>
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th>Id</th>
+      <th>CNPJ</th>
+      <th>Razão Social</th>
+      <th>Nome</th>
+      <th>Telefone</th>
+      <th>Opções</th>
+    </tr>
+  </thead>
+  <tbody *ngIf='lojas && lojas.length'>
+    <tr *ngFor='let loja of lojasFiltradas'>
+      <td>{{loja.Id}}</td>
+      <td>{{loja.cnpj}}</td>
+      <td>{{loja.razaoSocial}}</td>
+      <td>{{loja.nomeFantasia}}</td>
+      <td>{{loja.telefone}}</td>
+      <td>
+        <button type="button" class="btn btn-primary btn-sm mr-2">Editar</button>
+        <button type="button" class="btn btn-danger btn-sm">Remover</button>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot *ngIf='!lojas.length'>
+    <tr>
+      <td colspan="6" class="text-center">
+      <h4>Nenhuma loja encontrada</h4></td>
+    </tr>
+  </tfoot>
+</table>
